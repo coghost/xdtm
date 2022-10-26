@@ -21,6 +21,10 @@ import (
 	"github.com/golang-module/carbon/v2"
 )
 
+const (
+	RFC3339MicroLayout = carbon.RFC3339MicroLayout
+)
+
 // TimestampAsF64
 func TimestampAsF64(offsetSeconds int, opts ...DtmOptFunc) float64 {
 	opt := DtmOpts{precision: _PRE_None}
@@ -96,4 +100,8 @@ func Str2Unix(str string, opts ...DtmOptFunc) int64 {
 // Unix2Str returns a string in "2006-01-02 15:04:05" layout
 func Unix2Str(timestamp int64) string {
 	return carbon.CreateFromTimestamp(timestamp).ToDateTimeString()
+}
+
+func TimestampToCarbon(n int64, zone ...string) carbon.Carbon {
+	return carbon.CreateFromTimestamp(n, zone...)
 }
