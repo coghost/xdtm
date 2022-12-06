@@ -51,6 +51,10 @@ func TimestampAsF64(offsetSeconds int, opts ...DtmOptFunc) float64 {
 	return t
 }
 
+func TimestampAsI64(offsetSeconds int, opts ...DtmOptFunc) int64 {
+	return int64(TimestampAsF64(offsetSeconds, opts...))
+}
+
 // PythonTimeTime returns same format with python's time.time() `1234567890.123456`
 //
 //	this is a wrapper of carbon.Timestamp-Milli/Micro/Nano
