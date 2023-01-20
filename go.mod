@@ -6,7 +6,7 @@ require (
 	github.com/golang-module/carbon/v2 v2.1.9
 	github.com/olebedev/when v0.0.0-20211212231525-59bd4edcf9d6
 	github.com/spf13/cast v1.5.0
-	github.com/stretchr/testify v1.8.0
+	github.com/stretchr/testify v1.8.1
 	github.com/tj/go-naturaldate v1.3.0
 )
 
