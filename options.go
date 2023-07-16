@@ -10,6 +10,12 @@ type DtmOpts struct {
 
 	layout string
 	zone   string
+
+	fallback string
+
+	replacement map[string]string
+
+	bySearch bool
 }
 
 type DtmOptFunc func(o *DtmOpts)
@@ -47,5 +53,23 @@ func WithLayout(s string) DtmOptFunc {
 func WithZone(s string) DtmOptFunc {
 	return func(o *DtmOpts) {
 		o.zone = s
+	}
+}
+
+func WithReplacements(m map[string]string) DtmOptFunc {
+	return func(o *DtmOpts) {
+		o.replacement = m
+	}
+}
+
+func WithFallback(s string) DtmOptFunc {
+	return func(o *DtmOpts) {
+		o.fallback = s
+	}
+}
+
+func WithBySearch(b bool) DtmOptFunc {
+	return func(o *DtmOpts) {
+		o.bySearch = b
 	}
 }
