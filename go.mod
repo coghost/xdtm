@@ -3,7 +3,7 @@ module github.com/coghost/xdtm
 go 1.19
 
 require (
-	github.com/golang-module/carbon/v2 v2.2.3
+	github.com/golang-module/carbon/v2 v2.3.4
 	github.com/markusmobius/go-dateparser v0.0.0-20220211203457-60965b2d2bfb
 	github.com/olebedev/when v0.0.0-20221205223600-4d190b02b8d8
 	github.com/spf13/cast v1.5.1

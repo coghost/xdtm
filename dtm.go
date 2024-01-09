@@ -35,16 +35,16 @@ func ToCarbon(raw string, opts ...DtmOptFunc) (c carbon.Carbon, err error) {
 			return c, errors.New("no date str found")
 		}
 		dts := res[0]
-		return carbon.Time2Carbon(dts.Date.Time), err
+		return carbon.CreateFromStdTime(dts.Date.Time), err
 	}
 
 	if opt.layout == "" {
 		dt, err := dateparser.Parse(cfg, raw)
-		return carbon.Time2Carbon(dt.Time), err
+		return carbon.CreateFromStdTime(dt.Time), err
 	}
 
 	dt, err := dateparser.Parse(cfg, raw, opt.layout)
-	return carbon.Time2Carbon(dt.Time), err
+	return carbon.CreateFromStdTime(dt.Time), err
 }
 
 func GetDateStr(raw string, opts ...DtmOptFunc) string {

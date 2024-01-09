@@ -81,7 +81,7 @@ func UTCToIso8601(args ...time.Time) string {
 	t := UTCNow()
 	if len(args) > 0 {
 		utc, _ := time.LoadLocation(carbon.UTC)
-		c := carbon.FromStdTime(args[0])
+		c := carbon.CreateFromStdTime(args[0])
 		t = c.SetLocation(utc)
 	}
 	return t.ToIso8601String()
