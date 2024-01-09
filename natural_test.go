@@ -41,7 +41,7 @@ func (s *NaturalSuite) Test_00_NParseBaseNow() {
 }
 
 func (s *NaturalSuite) Test_02_NParse() {
-	var past = []struct {
+	past := []struct {
 		raw   string
 		wantS string
 		wantE error
