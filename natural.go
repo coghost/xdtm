@@ -8,9 +8,7 @@ import (
 	"github.com/tj/go-naturaldate"
 )
 
-var (
-	wp = &when.Parser{}
-)
+var wp = &when.Parser{}
 
 func init() {
 	wp.Add(en.All...)
@@ -18,7 +16,7 @@ func init() {
 }
 
 func NParseBaseNow(opts ...DtmOptFunc) (string, error) {
-	opt := DtmOpts{baseTime: carbon.Now().Carbon2Time().UTC()}
+	opt := DtmOpts{baseTime: carbon.Now().ToStdTime().UTC()}
 	bindDtmOpts(&opt, opts...)
 
 	t, err := naturaldate.Parse("now", opt.baseTime)
@@ -31,8 +29,15 @@ func NParseBaseNow(opts ...DtmOptFunc) (string, error) {
 // NParse wrapper of naturedate.Parse
 // WARN: string like `no datetime str`, will return current datetime and no error
 func NParse(raw string, opts ...DtmOptFunc) (string, error) {
-	opt := DtmOpts{baseTime: carbon.Now().Carbon2Time().UTC()}
+	opt := DtmOpts{baseTime: carbon.Now().ToStdTime().UTC()}
 	bindDtmOpts(&opt, opts...)
+
+	if opt.baseTimestamp != 0 {
+		opt.baseTime = carbon.CreateFromTimestamp(opt.baseTimestamp, carbon.Greenwich).ToStdTime().UTC()
+	}
+	if opt.baseTimeStr != "" {
+		opt.baseTime = carbon.Parse(opt.baseTimeStr, carbon.Greenwich).ToStdTime().UTC()
+	}
 
 	if raw == "" {
 		return "", ErrEmptyStr
@@ -64,11 +69,35 @@ func NParse(raw string, opts ...DtmOptFunc) (string, error) {
 	return str, nil
 }
 
+func NParseToCarbon(raw string, opts ...DtmOptFunc) (carbon.Carbon, error) {
+	str, err := NParse(raw, opts...)
+	if err != nil {
+		return carbon.Carbon{}, err
+	}
+	return ToCarbon(str)
+}
+
+func MustNParseToCarbon(raw string, opts ...DtmOptFunc) carbon.Carbon {
+	c, err := NParseToCarbon(raw, opts...)
+	if err != nil {
+		panic(err)
+	}
+	return c
+}
+
+// WParse is partial of NParse
 func WParse(raw string, opts ...DtmOptFunc) (string, error) {
-	opt := DtmOpts{baseTime: carbon.Now().Carbon2Time().UTC()}
+	opt := DtmOpts{baseTime: carbon.Now().ToStdTime().UTC()}
 	bindDtmOpts(&opt, opts...)
 	if raw == "" {
 		return "", ErrEmptyStr
+	}
+
+	if opt.baseTimestamp != 0 {
+		opt.baseTime = carbon.CreateFromTimestamp(opt.baseTimestamp, carbon.Greenwich).ToStdTime().UTC()
+	}
+	if opt.baseTimeStr != "" {
+		opt.baseTime = carbon.Parse(opt.baseTimeStr, carbon.Greenwich).ToStdTime().UTC()
 	}
 
 	s, err := wp.Parse(raw, opt.baseTime)

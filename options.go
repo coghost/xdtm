@@ -7,6 +7,7 @@ type DtmOpts struct {
 
 	baseTime      time.Time
 	baseTimestamp int64
+	baseTimeStr   string
 
 	layout string
 	zone   string
@@ -41,6 +42,12 @@ func WithBaseTime(t time.Time) DtmOptFunc {
 func WithBaseTimestamp(i int64) DtmOptFunc {
 	return func(o *DtmOpts) {
 		o.baseTimestamp = i
+	}
+}
+
+func WithBaseTimeStr(t string) DtmOptFunc {
+	return func(o *DtmOpts) {
+		o.baseTimeStr = t
 	}
 }
 

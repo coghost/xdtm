@@ -93,6 +93,15 @@ func StrNow() string {
 	return carbon.Now().ToDateTimeString()
 }
 
+// ToShortDateTimeString outputs a string in "20060102150405" layout.
+func StrNowShortDatetime() string {
+	return carbon.Now().ToShortDateTimeString()
+}
+
+func CarbonNow() carbon.Carbon {
+	return carbon.Now()
+}
+
 // Str2Unix returns timestamp of given string
 func Str2Unix(str string, opts ...DtmOptFunc) int64 {
 	opt := DtmOpts{layout: carbon.DateTimeLayout}
