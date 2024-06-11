@@ -93,6 +93,18 @@ func StrNow() string {
 	return carbon.Now().ToDateTimeString()
 }
 
+// StrToday
+//   - outputs a string in "2006-01-02" layout.
+func StrToday() string {
+	return carbon.Now().ToDateString()
+}
+
+// StrYesterday
+//   - outputs a string in "2006-01-02" layout.
+func StrYesterday() string {
+	return carbon.Now().SubDay().ToDateString()
+}
+
 // ToShortDateTimeString outputs a string in "20060102150405" layout.
 func StrNowShortDatetime() string {
 	return carbon.Now().ToShortDateTimeString()

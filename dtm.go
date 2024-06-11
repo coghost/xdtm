@@ -48,7 +48,7 @@ func ToCarbon(raw string, opts ...DtmOptFunc) (c carbon.Carbon, err error) {
 }
 
 func GetDateStr(raw string, opts ...DtmOptFunc) string {
-	opt := DtmOpts{baseTime: time.Now().UTC()}
+	opt := DtmOpts{}
 	bindDtmOpts(&opt, opts...)
 
 	c, err := ToCarbon(raw, opts...)
