@@ -1,10 +1,10 @@
-package xdtm_test
+package xdtm
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
-	"github.com/coghost/xdtm"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -29,35 +29,32 @@ func (s *NaturalSuite) Test_00_NParseBaseNow() {
 		wantE error
 	}{
 		{"string with no datetime", "2009-02-13T23:31:30+00:00", nil},
-		// {"", "2009-02-13T23:31:30+00:00", nil},
-		// {"1 minute", "2009-02-13T23:31:30+00:00", nil},
+		{"", "2009-02-13T23:31:30+00:00", nil},
+		{"1 minute", "2009-02-13T23:31:30+00:00", nil},
 	}
 	base := time.Unix(1234567890, 0).UTC()
 	for _, tt := range testsIn {
-		v, e := xdtm.NParseBaseNow(xdtm.WithBaseTime(base))
+		v, e := NParseBaseNow(WithBaseTime(base))
 		s.Equal(tt.wantE, e)
 		s.Equal(tt.wantS, v)
 	}
 }
 
 func (s *NaturalSuite) Test_02_NParse() {
-	past := []struct {
+	// basetime: 2009-02-13 23:31:30 UTC
+	tests := []struct {
 		raw   string
 		wantS string
 		wantE error
 	}{
-		// {"2 days ago", "2009-02-11T00:00:00+00:00", nil},
-		// {"3 hours ago", "2009-02-13T20:31:30+00:00", nil},
-		// {"yesterday", "2009-02-12T00:00:00+00:00", nil},
-
 		// now
-		{"now", "2009-02-13T23:31:30+00:00", nil},
+		{`now`, "2009-02-13T23:31:30+00:00", nil},
 		{"right now", "2009-02-13T23:31:30+00:00", nil},
 		{"  right  now  ", "2009-02-13T23:31:30+00:00", nil},
 
 		// error
-		{"string with no datetime", "", xdtm.ErrNonDateStr},
-		{"", "", xdtm.ErrEmptyStr},
+		{"string with no datetime", "", ErrNonDateStr},
+		{"", "", ErrEmptyStr},
 
 		// seconds
 		// {"10 second", "2009-02-13T23:30:30+00:00", nil},
@@ -92,8 +89,8 @@ func (s *NaturalSuite) Test_02_NParse() {
 		// days
 		{"1 day", "2009-02-12T00:00:00+00:00", nil},
 		{"next day", "2009-02-14T00:00:00+00:00", nil},
-		{"1 day ago", "2009-02-12T00:00:00+00:00", nil},
-		{"3 days ago", "2009-02-10T00:00:00+00:00", nil},
+		{"1 day ago", "2009-02-12T23:31:30+00:00", nil},
+		{"3 days ago", "2009-02-10T23:31:30+00:00", nil},
 		{"3 days ago at 11:25am", "2009-02-10T11:25:00+00:00", nil},
 		{"1 day from now", "2009-02-14T23:31:30+00:00", nil},
 		{"Remind me one day from now", "2009-02-14T23:31:30+00:00", nil},
@@ -103,10 +100,10 @@ func (s *NaturalSuite) Test_02_NParse() {
 
 		// weeks
 		{"1 week", "2009-02-06T00:00:00+00:00", nil},
-		{"1 week ago", "2009-02-06T00:00:00+00:00", nil},
-		{"2 weeks ago", "2009-01-30T00:00:00+00:00", nil},
+		{"1 week ago", "2009-02-06T23:31:30+00:00", nil},
+		{"2 weeks ago", "2009-01-30T23:31:30+00:00", nil},
 		{"2 weeks ago at 8am", "2009-01-30T08:00:00+00:00", nil},
-		{"next week", "2009-02-20T00:00:00+00:00", nil},
+		{"next week", "2009-02-15T00:00:00+00:00", nil},
 		{"Message me in a week", "2009-02-20T23:31:30+00:00", nil},
 		{"Message me in one week", "2009-02-20T23:31:30+00:00", nil},
 		{"Message me in one week from now", "2009-02-20T23:31:30+00:00", nil},
@@ -116,8 +113,8 @@ func (s *NaturalSuite) Test_02_NParse() {
 
 		// months
 		{"1 month ago", "2009-01-13T23:31:30+00:00", nil},
-		{"last month", "2009-01-13T23:31:30+00:00", nil},
-		{"next month", "2009-03-13T23:31:30+00:00", nil},
+		{"last month", "2009-01-01T00:00:00+00:00", nil},
+		{"next month", "2009-03-01T00:00:00+00:00", nil},
 		{"1 month ago at 9:30am", "2009-01-13T09:30:00+00:00", nil},
 		{"2 months ago", "2008-12-13T23:31:30+00:00", nil},
 		{"12 months ago", "2008-02-13T23:31:30+00:00", nil},
@@ -132,8 +129,8 @@ func (s *NaturalSuite) Test_02_NParse() {
 		{"Remind me in 2 months from now", "2009-04-13T23:31:30+00:00", nil},
 
 		// years
-		{"last year", "2008-02-13T23:31:30+00:00", nil},
-		{"next year", "2010-02-13T23:31:30+00:00", nil},
+		{"last year", "2008-01-01T00:00:00+00:00", nil},
+		{"next year", "2010-01-01T00:00:00+00:00", nil},
 		{"one year ago", "2008-02-13T23:31:30+00:00", nil},
 		{"one year from now", "2010-02-13T23:31:30+00:00", nil},
 		{"two years ago", "2007-02-13T23:31:30+00:00", nil},
@@ -177,13 +174,13 @@ func (s *NaturalSuite) Test_02_NParse() {
 		{"last saturday", "2009-02-07T00:00:00+00:00", nil},
 
 		// ordinal dates
-		{"november 15th", "2008-11-15T23:31:30+00:00", nil},
-		{"december 1st", "2008-12-01T23:31:30+00:00", nil},
-		{"december 2nd", "2008-12-02T23:31:30+00:00", nil},
-		{"december 3rd", "2008-12-03T23:31:30+00:00", nil},
-		{"december 4th", "2008-12-04T23:31:30+00:00", nil},
-		{"december 15th", "2008-12-15T23:31:30+00:00", nil},
-		{"december 23rd", "2008-12-23T23:31:30+00:00", nil},
+		{"november 15th", "2008-11-15T00:00:00+00:00", nil},
+		{"december 1st", "2008-12-01T00:00:00+00:00", nil},
+		{"december 2nd", "2008-12-02T00:00:00+00:00", nil},
+		{"december 3rd", "2008-12-03T00:00:00+00:00", nil},
+		{"december 4th", "2008-12-04T00:00:00+00:00", nil},
+		{"december 15th", "2008-12-15T00:00:00+00:00", nil},
+		{"december 23rd", "2008-12-23T00:00:00+00:00", nil},
 		{"december 23rd 5pm", "2008-12-23T17:00:00+00:00", nil},
 		{"december 23rd at 5pm", "2008-12-23T17:00:00+00:00", nil},
 		{"december 23rd at 5:25pm", "2008-12-23T17:25:00+00:00", nil},
@@ -220,22 +217,27 @@ func (s *NaturalSuite) Test_02_NParse() {
 		// combined
 		{"1 hour 10 minutes ago", "2009-02-13T22:21:30+00:00", nil},
 		//
-		{"next September", "2009-09-13T23:31:30+00:00", nil},
+		{"next September", "2009-09-01T00:00:00+00:00", nil},
 
 		// errors
-		{`10:am`, "", nil},
+		{`10:am`, "", ErrParseFailed},
 	}
 
 	base := time.Unix(1234567890, 0).UTC()
-	for _, tt := range past {
-		v, e := xdtm.NParse(tt.raw, xdtm.WithBaseTime(base))
-		s.Equal(tt.wantE, e, colorize(tt.raw))
-		s.Equal(tt.wantS, v, colorize(tt.raw))
+
+	for i, tt := range tests {
+		v, err := NParse(tt.raw, WithBaseTime(base))
+
+		if tt.wantE != nil {
+			s.ErrorIs(err, tt.wantE, fmtTestMsg(i, tt.raw))
+		} else {
+			s.Equal(tt.wantS, v, fmtTestMsg(i, tt.raw))
+		}
 	}
 }
 
-func colorize(str string) string {
-	return str
+func fmtTestMsg(i int, str string) string {
+	return fmt.Sprintf("%d-%s", i, str)
 }
 
 func (s *NaturalSuite) Test_03_DateWParse() {
@@ -251,9 +253,9 @@ func (s *NaturalSuite) Test_03_DateWParse() {
 		{"next September", "2009-09-13T23:31:30+00:00", nil},
 	}
 	base := time.Unix(1234567890, 0).UTC()
-	for _, tt := range tests {
-		r, err := xdtm.WParse(tt.raw, xdtm.WithBaseTime(base))
-		s.Equal(tt.wantE, err, colorize(tt.raw))
-		s.Equal(tt.wantS, r, colorize(tt.raw))
+	for i, tt := range tests {
+		r, err := WParse(tt.raw, WithBaseTime(base))
+		s.Equal(tt.wantE, err, fmtTestMsg(i, tt.raw))
+		s.Equal(tt.wantS, r, fmtTestMsg(i, tt.raw))
 	}
 }

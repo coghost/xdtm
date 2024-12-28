@@ -1,11 +1,11 @@
 package xdtm
 
 import (
-	"errors"
+	"fmt"
 	"strings"
 	"time"
 
-	"github.com/golang-module/carbon/v2"
+	"github.com/dromara/carbon/v2"
 	"github.com/markusmobius/go-dateparser"
 )
 
@@ -31,11 +31,12 @@ func ToCarbon(raw string, opts ...DtmOptFunc) (c carbon.Carbon, err error) {
 		if err != nil {
 			return c, err
 		}
+
 		if len(res) == 0 {
-			return c, errors.New("no date str found")
+			return c, fmt.Errorf("%w: %s", ErrNonDateStr, raw)
 		}
-		dts := res[0]
-		return carbon.CreateFromStdTime(dts.Date.Time), err
+
+		return carbon.CreateFromStdTime(res[0].Date.Time), err
 	}
 
 	if opt.layout == "" {
@@ -44,6 +45,10 @@ func ToCarbon(raw string, opts ...DtmOptFunc) (c carbon.Carbon, err error) {
 	}
 
 	dt, err := dateparser.Parse(cfg, raw, opt.layout)
+	if err != nil {
+		return carbon.Carbon{}, fmt.Errorf("cannot parse date: %w", err)
+	}
+
 	return carbon.CreateFromStdTime(dt.Time), err
 }
 
@@ -53,8 +58,9 @@ func GetDateStr(raw string, opts ...DtmOptFunc) string {
 
 	c, err := ToCarbon(raw, opts...)
 	if err != nil {
-		return IfThenElse(opt.fallback != "", opt.fallback, "").(string)
+		return IfThenElse(opt.fallback != "", opt.fallback, "")
 	}
+
 	return c.ToDateString()
 }
 
@@ -63,13 +69,15 @@ func GetDateTimeStr(raw string, opts ...DtmOptFunc) string {
 	if err != nil {
 		return ""
 	}
+
 	return c.ToDateTimeString()
 }
 
 // IfThenElse evaluates a condition, if true returns the first parameter otherwise the second
-func IfThenElse(condition bool, a interface{}, b interface{}) interface{} {
+func IfThenElse[T any](condition bool, a T, b T) T {
 	if condition {
 		return a
 	}
+
 	return b
 }

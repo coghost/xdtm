@@ -18,7 +18,7 @@ import (
 	"math"
 	"time"
 
-	"github.com/golang-module/carbon/v2"
+	"github.com/dromara/carbon/v2"
 )
 
 const (
@@ -27,28 +27,28 @@ const (
 
 // TimestampAsF64
 func TimestampAsF64(offsetSeconds int, opts ...DtmOptFunc) float64 {
-	opt := DtmOpts{precision: _PRE_None}
+	opt := DtmOpts{precision: precisionNone}
 	bindDtmOpts(&opt, opts...)
 
-	c := carbon.Now()
-	c = c.AddSeconds(offsetSeconds)
+	carb := carbon.Now()
+	carb = carb.AddSeconds(offsetSeconds)
 
-	n := int64(0)
+	timestamp := int64(0)
+
 	switch opt.precision {
-	case _PRE_None:
-		n = c.Timestamp()
-	case _PRE_Milli:
-		n = c.TimestampMilli()
-	case _PRE_Micro:
-		n = c.TimestampMicro()
-	case _PRE_Nano:
-		n = c.TimestampNano()
+	case precisionNone:
+		timestamp = carb.Timestamp()
+	case precisionMilli:
+		timestamp = carb.TimestampMilli()
+	case precisionMicro:
+		timestamp = carb.TimestampMicro()
+	case precisionNano:
+		timestamp = carb.TimestampNano()
 	default:
-		n = 0
+		timestamp = 0
 	}
 
-	t := float64(n) / math.Pow10(opt.precision)
-	return t
+	return float64(timestamp) / math.Pow10(opt.precision)
 }
 
 func TimestampAsI64(offsetSeconds int, opts ...DtmOptFunc) int64 {
@@ -63,7 +63,8 @@ func PythonTimeTime(offsetArgs ...int) float64 {
 	if len(offsetArgs) > 0 {
 		offset = offsetArgs[0]
 	}
-	return TimestampAsF64(offset, WithPrecision(_PRE_Micro))
+
+	return TimestampAsF64(offset, WithPrecision(precisionMicro))
 }
 
 // Now alias of carbon.Now()
@@ -78,13 +79,15 @@ func UTCNow() (c carbon.Carbon) {
 
 // UTCToIso8601 outputs a string in "2006-01-02T15:04:05-07:00" layout.
 func UTCToIso8601(args ...time.Time) string {
-	t := UTCNow()
+	now := UTCNow()
+
 	if len(args) > 0 {
 		utc, _ := time.LoadLocation(carbon.UTC)
 		c := carbon.CreateFromStdTime(args[0])
-		t = c.SetLocation(utc)
+		now = c.SetLocation(utc)
 	}
-	return t.ToIso8601String()
+
+	return now.ToIso8601String()
 }
 
 // StrNow alias of carbon.Now().ToDateTimeString()
@@ -118,15 +121,11 @@ func CarbonNow() carbon.Carbon {
 func Str2Unix(str string, opts ...DtmOptFunc) int64 {
 	opt := DtmOpts{layout: carbon.DateTimeLayout}
 	bindDtmOpts(&opt, opts...)
-	c := carbon.ParseByLayout(str, opt.layout)
-	return c.Timestamp()
+
+	return carbon.ParseByLayout(str, opt.layout).Timestamp()
 }
 
 // Unix2Str returns a string in "2006-01-02 15:04:05" layout
 func Unix2Str(timestamp int64) string {
 	return carbon.CreateFromTimestamp(timestamp).ToDateTimeString()
-}
-
-func TimestampToCarbon(n int64, zone ...string) carbon.Carbon {
-	return carbon.CreateFromTimestamp(n, zone...)
 }
