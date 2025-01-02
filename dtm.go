@@ -15,16 +15,21 @@ func Get(raw string, opts ...DtmOptFunc) (c carbon.Carbon, err error) {
 }
 
 func ToCarbon(raw string, opts ...DtmOptFunc) (c carbon.Carbon, err error) {
-	opt := DtmOpts{baseTime: time.Now().UTC()}
+	opt := DtmOpts{
+		baseTime: time.Now().UTC(),
+		dpsConfig: &dateparser.Configuration{
+			PreferredDateSource: dateparser.Past,
+		},
+	}
+
 	bindDtmOpts(&opt, opts...)
 
 	for k, v := range opt.replacement {
 		raw = strings.ReplaceAll(raw, k, v)
 	}
 
-	cfg := &dateparser.Configuration{
-		CurrentTime: opt.baseTime,
-	}
+	cfg := opt.dpsConfig
+	cfg.CurrentTime = opt.baseTime
 
 	if opt.bySearch {
 		_, res, err := dateparser.Search(cfg, raw)

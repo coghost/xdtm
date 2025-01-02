@@ -1,6 +1,10 @@
 package xdtm
 
-import "time"
+import (
+	"time"
+
+	"github.com/markusmobius/go-dateparser"
+)
 
 type DtmOpts struct {
 	precision int
@@ -17,6 +21,8 @@ type DtmOpts struct {
 	replacement map[string]string
 
 	bySearch bool
+
+	dpsConfig *dateparser.Configuration
 }
 
 type DtmOptFunc func(o *DtmOpts)
@@ -24,6 +30,12 @@ type DtmOptFunc func(o *DtmOpts)
 func bindDtmOpts(opt *DtmOpts, opts ...DtmOptFunc) {
 	for _, f := range opts {
 		f(opt)
+	}
+}
+
+func WithDpsConfig(cfg *dateparser.Configuration) DtmOptFunc {
+	return func(o *DtmOpts) {
+		o.dpsConfig = cfg
 	}
 }
 
